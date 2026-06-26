@@ -1,0 +1,40 @@
+function App() {
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#f4f6f9",
+        padding: "40px",
+        fontFamily: "Arial, sans-serif",
+      }}
+    >
+      <h1 style={{ color: "#0d6efd" }}>
+        CCI Maintenance Management System
+      </h1>
+
+      <p>Welcome, Arin 👋</p>
+
+      <hr />
+
+      <h2>Dashboard</h2>
+
+      <div style={{ marginTop: "30px" }}>
+        <button>Daily Reports</button>
+
+        <button style={{ marginLeft: "10px" }}>
+          Tasks
+        </button>
+
+        <button style={{ marginLeft: "10px" }}>
+          Machines
+        </button>
+
+        <button style={{ marginLeft: "10px" }}>
+          Inspection
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default App;
