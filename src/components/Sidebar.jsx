@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 export default function Sidebar() {
   return (
     <div
@@ -12,9 +13,12 @@ export default function Sidebar() {
           📊 Dashboard
         </button>
 
-        <button className="list-group-item list-group-item-action">
-          📝 Daily Reports
-        </button>
+        <Link
+    to="/dailyreports"
+    className="list-group-item list-group-item-action text-decoration-none"
+>
+    📝 Daily Reports
+</Link>
 
         <button className="list-group-item list-group-item-action">
           ✅ Tasks
