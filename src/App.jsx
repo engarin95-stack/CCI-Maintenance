@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import DailyReports from "./pages/DailyReports";
 import Reports from "./pages/Reports";
+import Tasks from "./pages/Tasks";
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -44,6 +45,15 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <Reports />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/tasks"
+        element={
+          <PrivateRoute>
+            <Tasks />
           </PrivateRoute>
         }
       />
