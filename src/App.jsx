@@ -1,98 +1,50 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import Tasks from "./pages/Tasks";
-import Machines from "./pages/Machines";
-import Inspection from "./pages/Inspection";
-import Warehouse from "./pages/Warehouse";
-import Reports from "./pages/Reports";
-import Settings from "./pages/Settings";
 import DailyReports from "./pages/DailyReports";
 
-import MainLayout from "./layouts/MainLayout";
+function PrivateRoute({ children }) {
+  const { user } = useAuth();
 
-function App() {
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+}
+
+function AppRoutes() {
   return (
     <Routes>
-
-      <Route path="/" element={<Navigate to="/login" />} />
-
-      <Route path="/login" element={<Login />} />
+      <Route path="/" element={<Login />} />
 
       <Route
         path="/dashboard"
         element={
-          <MainLayout>
+          <PrivateRoute>
             <Dashboard />
-          </MainLayout>
+          </PrivateRoute>
         }
       />
 
       <Route
-        path="/tasks"
+        path="/daily-reports"
         element={
-          <MainLayout>
-            <Tasks />
-          </MainLayout>
-        }
-      />
-
-      <Route
-        path="/machines"
-        element={
-          <MainLayout>
-            <Machines />
-          </MainLayout>
-        }
-      />
-
-      <Route
-        path="/inspection"
-        element={
-          <MainLayout>
-            <Inspection />
-          </MainLayout>
-        }
-      />
-
-      <Route
-        path="/warehouse"
-        element={
-          <MainLayout>
-            <Warehouse />
-          </MainLayout>
-        }
-      />
-
-      <Route
-        path="/reports"
-        element={
-          <MainLayout>
-            <Reports />
-          </MainLayout>
-        }
-      />
-
-      <Route
-        path="/settings"
-        element={
-          <MainLayout>
-            <Settings />
-          </MainLayout>
-        }
-      />
-      <Route
-    path="/dailyreports"
-    element={
-        <MainLayout>
+          <PrivateRoute>
             <DailyReports />
-        </MainLayout>
-    }
-/>
-
+          </PrivateRoute>
+        }
+      />
     </Routes>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
+  );
+}
