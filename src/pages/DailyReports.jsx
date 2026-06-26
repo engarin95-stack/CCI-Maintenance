@@ -1,90 +1,96 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../services/api";
 
 export default function DailyReports() {
-  const [technician] = useState("Ahmed");
-  const [shift] = useState("08:00 - 16:00");
-  const [report, setReport] = useState("");
+  const technicians = ["Ahmed", "Basher", "Redar", "Admin"];
 
-  async function submitReport() {
+  const getShift = () => {
+    const hour = new Date().getHours();
+
+    if (hour >= 0 && hour < 8) return "00:00 - 08:00";
+    if (hour >= 8 && hour < 16) return "08:00 - 16:00";
+    return "16:00 - 00:00";
+  };
+
+  const [technician, setTechnician] = useState(technicians[0]);
+  const [report, setReport] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const submitReport = async () => {
     if (report.trim() === "") {
       alert("Please write your report.");
       return;
     }
 
+    setLoading(true);
+
     try {
-      await axios.post("http://localhost:5000/reports", {
+      await api.post("/reports", {
         technician,
-        shift,
+        shift: getShift(),
         report,
       });
 
-      alert("Report submitted successfully!");
+      alert("Report submitted successfully.");
 
       setReport("");
-
-    } catch (error) {
-      console.error(error);
-      alert("Cannot connect to the server.");
+    } catch (err) {
+      alert("Cannot connect to server.");
+      console.error(err);
     }
-  }
+
+    setLoading(false);
+  };
 
   return (
-    <div className="container-fluid p-4">
+    <div className="container mt-4">
 
       <h1 className="mb-4">Daily Work Report</h1>
 
       <div className="card shadow p-4">
 
-        <div className="row mb-4">
+        <div className="mb-3">
+          <label className="form-label">Technician</label>
 
-          <div className="col-md-6">
-            <label className="form-label">
-              Technician
-            </label>
+          <select
+            className="form-select"
+            value={technician}
+            onChange={(e) => setTechnician(e.target.value)}
+          >
+            {technicians.map((tech) => (
+              <option key={tech}>{tech}</option>
+            ))}
+          </select>
+        </div>
 
-            <input
-              className="form-control"
-              value={technician}
-              disabled
-            />
-          </div>
+        <div className="mb-3">
+          <label className="form-label">Current Shift</label>
 
-          <div className="col-md-6">
-            <label className="form-label">
-              Shift
-            </label>
-
-            <input
-              className="form-control"
-              value={shift}
-              disabled
-            />
-          </div>
-
+          <input
+            className="form-control"
+            value={getShift()}
+            disabled
+          />
         </div>
 
         <div className="mb-4">
-
-          <label className="form-label">
-            Daily Report
-          </label>
+          <label className="form-label">Today's Report</label>
 
           <textarea
-            className="form-control"
             rows="12"
-            placeholder="Write everything you did during your shift..."
+            className="form-control"
+            placeholder="Write everything you did during this shift..."
             value={report}
             onChange={(e) => setReport(e.target.value)}
           />
-
         </div>
 
         <button
           className="btn btn-primary"
           onClick={submitReport}
+          disabled={loading}
         >
-          Submit Report
+          {loading ? "Submitting..." : "Submit Report"}
         </button>
 
       </div>
