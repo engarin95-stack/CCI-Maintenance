@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import DailyReports from "./pages/DailyReports";
+import Reports from "./pages/Reports";
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -34,6 +35,15 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <DailyReports />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/reports"
+        element={
+          <PrivateRoute>
+            <Reports />
           </PrivateRoute>
         }
       />
