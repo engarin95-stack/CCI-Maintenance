@@ -29,6 +29,47 @@ export default function Tasks() {
     loadTasks();
   }, []);
 
+  async function completeTask(id) {
+
+  const note = window.prompt(
+    "Completion Note (Optional)"
+  );
+
+  try {
+
+    await api.put(`/tasks/${id}`, {
+      completed_by: user.fullname,
+      completion_note: note || "",
+    });
+
+    alert("Task completed successfully.");
+
+    loadTasks();
+
+  } catch (err) {
+
+    console.error(err);
+
+    alert("Unable to complete task.");
+
+  }
+
+}
+  async function deleteTask(id) {
+  if (!window.confirm("Delete this task?")) return;
+
+  try {
+    await api.delete(`/tasks/${id}`);
+
+    alert("Task deleted successfully.");
+
+    loadTasks();
+  } catch (err) {
+    console.error(err);
+    alert("Unable to delete task.");
+  }
+}
+
   async function createTask(e) {
     e.preventDefault();
 
@@ -189,6 +230,7 @@ export default function Tasks() {
                 <th>Priority</th>
                 <th>Status</th>
                 <th>Due Date</th>
+                <th>Actions</th>
               </tr>
 
             </thead>
@@ -204,6 +246,23 @@ export default function Tasks() {
                   <td>{task.priority}</td>
                   <td>{task.status}</td>
                   <td>{task.due_date}</td>
+                  <td>
+                  {task.status === "Open" && (
+                    <button
+                    className="btn btn-success btn-sm me-2"
+                    onClick={() => completeTask(task.id)}
+                    >
+                      complete
+                    </button>
+                     )}
+
+                     <button
+                     className="btn btn-danger btn-sm"
+                     onClick={() => deleteTask(task.id)}
+                     >
+                      Delete
+                       </button>
+                       </td>
                 </tr>
 
               ))}
