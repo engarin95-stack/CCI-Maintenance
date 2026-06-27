@@ -1,7 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";;
+import { useAuth } from "../context/AuthContext";
+import MainLayout from "../layouts/MainLayout";
 import api from "../services/api";
 
 export default function DailyReports() {
+  const { user } = useAuth();
+const isAdmin = user.role === "Admin";
   const technicians = ["Ahmed", "Basher", "Redar", "Admin"];
 
   const getShift = () => {
@@ -12,11 +16,54 @@ export default function DailyReports() {
     return "16:00 - 00:00";
   };
 
-  const [technician, setTechnician] = useState(technicians[0]);
+const [technician] = useState(user.fullname);
   const [report, setReport] = useState("");
   const [loading, setLoading] = useState(false);
+  const [reports, setReports] = useState([]);
 
-  const submitReport = async () => {
+  const loadReports = async () => {
+
+  try {
+    const res = await api.get("/reports");
+
+    if (isAdmin) {
+      setReports(res.data);
+    } else {
+      setReports(
+        res.data.filter(
+          (r) => r.technician === user.fullname
+        )
+      );
+    }
+
+  } catch (err) {
+    console.error(err);
+  }
+};
+  useEffect(() => {
+  loadReports();
+}, []);
+const deleteReport = async (id) => {
+
+  if (!window.confirm("Delete this report?"))
+    return;
+
+  try {
+
+    await api.delete(`/reports/${id}`);
+
+    loadReports();
+
+  } catch (err) {
+
+    console.error(err);
+
+    alert("Unable to delete report.");
+
+  }
+
+};
+const submitReport = async () => {
     if (report.trim() === "") {
       alert("Please write your report.");
       return;
@@ -34,6 +81,7 @@ export default function DailyReports() {
       alert("Report submitted successfully.");
 
       setReport("");
+      loadReports();
     } catch (err) {
       alert("Cannot connect to server.");
       console.error(err);
@@ -43,6 +91,8 @@ export default function DailyReports() {
   };
 
   return (
+    <MainLayout>
+
     <div className="container mt-4">
 
       <h1 className="mb-4">Daily Work Report</h1>
@@ -50,18 +100,24 @@ export default function DailyReports() {
       <div className="card shadow p-4">
 
         <div className="mb-3">
-          <label className="form-label">Technician</label>
+  <label className="form-label">Technician</label>
 
-          <select
-            className="form-select"
-            value={technician}
-            onChange={(e) => setTechnician(e.target.value)}
-          >
-            {technicians.map((tech) => (
-              <option key={tech}>{tech}</option>
-            ))}
-          </select>
-        </div>
+  {isAdmin ? (
+    <select
+      className="form-select"
+      value={technician}
+      disabled
+    >
+      <option>{technician}</option>
+    </select>
+  ) : (
+    <input
+      className="form-control"
+      value={technician}
+      disabled
+    />
+  )}
+</div>
 
         <div className="mb-3">
           <label className="form-label">Current Shift</label>
@@ -95,6 +151,61 @@ export default function DailyReports() {
 
       </div>
 
+      <div className="card mt-4">
+  <div className="card-body">
+
+    <h4>
+      {isAdmin ? "All Reports" : "My Reports"}
+    </h4>
+
+    <table className="table table-striped mt-3">
+
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Technician</th>
+          <th>Shift</th>
+          <th>Report</th>
+<th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        {reports.map((item) => (
+
+          <tr key={item.id}>
+            <td>{item.created_at}</td>
+            <td>{item.technician}</td>
+            <td>{item.shift}</td>
+            <td>{item.report}</td>
+
+<td>
+
+  {isAdmin && (
+
+    <button
+      className="btn btn-danger btn-sm"
+      onClick={() => deleteReport(item.id)}
+    >
+      Delete
+    </button>
+
+  )}
+
+</td>
+          </tr>
+
+        ))}
+
+      </tbody>
+
+    </table>
+
+  </div>
+</div>
+
     </div>
-  );
+</MainLayout>
+);
 }

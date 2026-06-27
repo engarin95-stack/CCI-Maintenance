@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 
 export default function Tasks() {
   const { user } = useAuth();
+  const isAdmin = user.role === "Admin";
 
   const [tasks, setTasks] = useState([]);
 
@@ -18,12 +19,20 @@ export default function Tasks() {
 
   async function loadTasks() {
     try {
-      const res = await api.get("/tasks");
-      setTasks(res.data);
-    } catch (err) {
-      console.error(err);
+      let res;
+
+    if (user.role === "Admin") {
+      res = await api.get("/tasks");
+    } else {
+      res = await api.get(`/tasks/my/${user.fullname}`);
     }
+
+    setTasks(res.data);
+
+  } catch (err) {
+    console.error(err);
   }
+}
 
   useEffect(() => {
     loadTasks();
@@ -102,178 +111,186 @@ export default function Tasks() {
   return (
     <MainLayout>
 
-      <h2 className="mb-4">Task Management</h2>
+  <h2 className="mb-4">Task Management</h2>
 
-      <div className="card mb-4">
-        <div className="card-body">
+  {isAdmin && (
+    <div className="card mb-4">
+      <div className="card-body">
 
-          <form onSubmit={createTask}>
+        <form onSubmit={createTask}>
 
-            <div className="mb-3">
-              <label>Task Title</label>
+          <div className="mb-3">
+            <label>Task Title</label>
+
+            <input
+              className="form-control"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="mb-3">
+            <label>Description</label>
+
+            <textarea
+              className="form-control"
+              rows="3"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+
+          <div className="row">
+
+            <div className="col-md-3">
+              <label>Assignment Type</label>
+
+              <select
+                className="form-control"
+                value={assignmentType}
+                onChange={(e) => setAssignmentType(e.target.value)}
+              >
+                <option>Technician</option>
+                <option>Shift</option>
+                <option>All</option>
+              </select>
+            </div>
+
+            <div className="col-md-3">
+              <label>Assigned To</label>
+
+              <select
+                className="form-control"
+                value={assignedTo}
+                onChange={(e) => setAssignedTo(e.target.value)}
+              >
+                <option>Ahmed</option>
+                <option>Basher</option>
+                <option>Redar</option>
+                <option>08:00 - 16:00</option>
+                <option>16:00 - 00:00</option>
+                <option>00:00 - 08:00</option>
+                <option>All Technicians</option>
+              </select>
+            </div>
+
+            <div className="col-md-3">
+              <label>Priority</label>
+
+              <select
+                className="form-control"
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+              >
+                <option>Low</option>
+                <option>Medium</option>
+                <option>High</option>
+              </select>
+            </div>
+
+            <div className="col-md-3">
+              <label>Due Date</label>
 
               <input
+                type="date"
                 className="form-control"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
               />
             </div>
 
-            <div className="mb-3">
-              <label>Description</label>
+          </div>
 
-              <textarea
-                className="form-control"
-                rows="3"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
+          <div className="mt-3">
+            <label>Machine (Optional)</label>
 
-            <div className="row">
+            <input
+              className="form-control"
+              value={machine}
+              onChange={(e) => setMachine(e.target.value)}
+            />
+          </div>
 
-              <div className="col-md-3">
-                <label>Assignment Type</label>
+          <button
+            className="btn btn-success mt-4"
+            type="submit"
+          >
+            Create Task
+          </button>
 
-                <select
-                  className="form-control"
-                  value={assignmentType}
-                  onChange={(e) => setAssignmentType(e.target.value)}
-                >
-                  <option>Technician</option>
-                  <option>Shift</option>
-                  <option>All</option>
-                </select>
-              </div>
+        </form>
 
-              <div className="col-md-3">
-                <label>Assigned To</label>
-
-                <select
-                  className="form-control"
-                  value={assignedTo}
-                  onChange={(e) => setAssignedTo(e.target.value)}
-                >
-                  <option>Ahmed</option>
-                  <option>Basher</option>
-                  <option>Redar</option>
-                  <option>08:00 - 16:00</option>
-                  <option>16:00 - 00:00</option>
-                  <option>00:00 - 08:00</option>
-                  <option>All Technicians</option>
-                </select>
-              </div>
-
-              <div className="col-md-3">
-                <label>Priority</label>
-
-                <select
-                  className="form-control"
-                  value={priority}
-                  onChange={(e) => setPriority(e.target.value)}
-                >
-                  <option>Low</option>
-                  <option>Medium</option>
-                  <option>High</option>
-                </select>
-              </div>
-
-              <div className="col-md-3">
-                <label>Due Date</label>
-
-                <input
-                  type="date"
-                  className="form-control"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                />
-              </div>
-
-            </div>
-
-            <div className="mt-3">
-              <label>Machine (Optional)</label>
-
-              <input
-                className="form-control"
-                value={machine}
-                onChange={(e) => setMachine(e.target.value)}
-              />
-            </div>
-
-            <button
-              className="btn btn-success mt-4"
-              type="submit"
-            >
-              Create Task
-            </button>
-
-          </form>
-
-        </div>
       </div>
+    </div>
+  )}
 
-      <div className="card">
-        <div className="card-body">
+  <div className="card">
+    <div className="card-body">
 
-          <h4>All Tasks</h4>
+      <h4>{isAdmin ? "All Tasks" : "My Tasks"}</h4>
 
-          <table className="table table-striped mt-3">
+      <table className="table table-striped mt-3">
 
-            <thead>
+        <thead>
 
-              <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Assigned To</th>
-                <th>Priority</th>
-                <th>Status</th>
-                <th>Due Date</th>
-                <th>Actions</th>
-              </tr>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Assigned To</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Due Date</th>
+            <th>Actions</th>
+          </tr>
 
-            </thead>
+        </thead>
 
-            <tbody>
+        <tbody>
 
-              {tasks.map((task) => (
+          {tasks.map((task) => (
 
-                <tr key={task.id}>
-                  <td>{task.id}</td>
-                  <td>{task.title}</td>
-                  <td>{task.assigned_to}</td>
-                  <td>{task.priority}</td>
-                  <td>{task.status}</td>
-                  <td>{task.due_date}</td>
-                  <td>
-                  {task.status === "Open" && (
-                    <button
+            <tr key={task.id}>
+              <td>{task.id}</td>
+              <td>{task.title}</td>
+              <td>{task.assigned_to}</td>
+              <td>{task.priority}</td>
+              <td>{task.status}</td>
+              <td>{task.due_date}</td>
+
+              <td>
+
+                {task.status === "Open" && (
+                  <button
                     className="btn btn-success btn-sm me-2"
                     onClick={() => completeTask(task.id)}
-                    >
-                      complete
-                    </button>
-                     )}
+                  >
+                    Complete
+                  </button>
+                )}
 
-                     <button
-                     className="btn btn-danger btn-sm"
-                     onClick={() => deleteTask(task.id)}
-                     >
-                      Delete
-                       </button>
-                       </td>
-                </tr>
+                {isAdmin && (
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => deleteTask(task.id)}
+                  >
+                    Delete
+                  </button>
+                )}
 
-              ))}
+              </td>
 
-            </tbody>
+            </tr>
 
-          </table>
+          ))}
 
-        </div>
-      </div>
+        </tbody>
 
-    </MainLayout>
+      </table>
+
+    </div>
+  </div>
+
+</MainLayout>
   );
 }
